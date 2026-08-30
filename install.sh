@@ -79,7 +79,7 @@ for i in "${!names[@]}"; do
   fi
   installed+=("$already_installed")
 
-  if ((already_installed)) || [[ "${names[$i]}" == "@riverai7z/pi-read" ]]; then
+  if ((already_installed)) || [[ "${names[$i]}" == "@riverai7z/pi-read" || "${names[$i]}" == "pi-simplify" ]]; then
     checked+=(0)
   else
     checked+=(1)
