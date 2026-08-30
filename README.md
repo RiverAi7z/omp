@@ -18,7 +18,7 @@ The installer offers:
 - `@narumitw/pi-plan-mode`
 - `@riverai7z/pi-read`
 - `@riverai7z/pi-todo`
-- `pi-sandbox`
+- `pi-sbx`
 - `pi-simplify`
 - `pi-web-access`
 - `extensions/tools.ts`
