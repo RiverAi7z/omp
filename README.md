@@ -22,6 +22,7 @@ The collection includes:
 - `@narumitw/pi-btw`
 - `@narumitw/pi-goal`
 - `@narumitw/pi-plan-mode`
+- `@riverai7z/pi-read`
 - `@riverai7z/pi-todo`
 - `pi-sandbox`
 - `pi-simplify`
@@ -35,7 +36,7 @@ Review [`install.sh`](./install.sh), then run it directly from GitHub:
 curl -fsSL https://raw.githubusercontent.com/riverai7z/omp/master/install.sh | bash
 ```
 
-The installer displays an interactive checkbox menu using each plugin's npm package name, with all plugins selected by default. Use ↑/↓ to move, Space to toggle `[ ]`/`[x]`, and Enter to install the selected plugins. It also includes `pi-web-access`. npm plugins are installed through `pi install`; the local `extensions/tools.ts` extension is downloaded to `~/.pi/agent/extensions/tools.ts`.
+The installer displays an interactive checkbox menu using each plugin's npm package name. All plugins are selected by default except `@riverai7z/pi-read`, which must be explicitly selected because it replaces Pi's built-in `read` tool. Use ↑/↓ to move, Space to toggle `[ ]`/`[x]`, and Enter to install the selected plugins. It also includes `pi-web-access`. npm plugins are installed through `pi install`; the local `extensions/tools.ts` extension is downloaded to `~/.pi/agent/extensions/tools.ts`.
 
 To install from a fork or another branch:
 

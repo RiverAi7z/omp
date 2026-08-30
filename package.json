@@ -13,6 +13,7 @@
       "./node_modules/@narumitw/pi-btw/dist/index.ts",
       "./node_modules/@narumitw/pi-goal/dist/index.ts",
       "./node_modules/@narumitw/pi-plan-mode/dist/index.ts",
+      "./node_modules/@riverai7z/pi-read/extensions/index.ts",
       "./node_modules/@riverai7z/pi-todo/index.ts",
       "./node_modules/pi-sandbox/index.ts",
       "./node_modules/pi-simplify/dist/index.js"
@@ -23,6 +24,7 @@
     "@narumitw/pi-btw": "^0.56.0",
     "@narumitw/pi-goal": "^0.54.3",
     "@narumitw/pi-plan-mode": "^0.56.0",
+    "@riverai7z/pi-read": "^0.1.0",
     "@riverai7z/pi-todo": "^0.1.1",
     "pi-sandbox": "^0.6.5",
     "pi-simplify": "^0.2.3"
@@ -32,6 +34,7 @@
     "@narumitw/pi-btw",
     "@narumitw/pi-goal",
     "@narumitw/pi-plan-mode",
+    "@riverai7z/pi-read",
     "@riverai7z/pi-todo",
     "pi-sandbox",
     "pi-simplify"

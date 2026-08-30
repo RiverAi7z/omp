@@ -21,6 +21,7 @@ names=(
   "@narumitw/pi-btw"
   "@narumitw/pi-goal"
   "@narumitw/pi-plan-mode"
+  "@riverai7z/pi-read"
   "@riverai7z/pi-todo"
   "pi-sandbox"
   "pi-simplify"
@@ -32,6 +33,7 @@ packages=(
   "npm:@narumitw/pi-btw"
   "npm:@narumitw/pi-goal"
   "npm:@narumitw/pi-plan-mode"
+  "npm:@riverai7z/pi-read"
   "npm:@riverai7z/pi-todo"
   "npm:pi-sandbox"
   "npm:pi-simplify"
@@ -41,8 +43,12 @@ packages=(
 
 exec 3<>"$TTY"
 checked=()
-for _ in "${names[@]}"; do
-  checked+=(1)
+for name in "${names[@]}"; do
+  if [[ "$name" == "@riverai7z/pi-read" ]]; then
+    checked+=(0)
+  else
+    checked+=(1)
+  fi
 done
 cursor=0
 ui_active=0
