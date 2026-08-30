@@ -42,7 +42,7 @@ packages=(
 exec 3<>"$TTY"
 checked=()
 for _ in "${names[@]}"; do
-  checked+=(0)
+  checked+=(1)
 done
 cursor=0
 ui_active=0
