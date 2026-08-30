@@ -27,16 +27,23 @@ The collection includes:
 - `pi-simplify`
 - `extensions/tools.ts`
 
-## Selective installation
+## Interactive installation
 
-Pi's official package installer does not show an interactive dependency picker. To install only selected features, install their existing packages directly:
+Review [`install.sh`](./install.sh), then run it directly from GitHub:
 
 ```bash
-pi install npm:@narumitw/pi-plan-mode
-pi install npm:@narumitw/pi-goal
-pi install npm:pi-sandbox
+curl -fsSL https://raw.githubusercontent.com/riverai7z/omp/master/install.sh | bash
 ```
 
-Use `pi config` to enable or disable resources from installed packages.
+The installer displays an interactive checkbox menu using each plugin's npm package name. Use ↑/↓ to move, Space to toggle `[ ]`/`[x]`, and Enter to install the selected plugins. It also includes `pi-web-access`. npm plugins are installed through `pi install`; the local `extensions/tools.ts` extension is downloaded to `~/.pi/agent/extensions/tools.ts`.
+
+To install from a fork or another branch:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/OWNER/REPO/BRANCH/install.sh \
+  | OMP_GITHUB_REPO=OWNER/REPO OMP_GITHUB_REF=BRANCH bash
+```
+
+Use `pi config` to enable or disable resources after installation. Re-run the installer to update the local `Tools` extension.
 
 Global settings and `AGENTS.md` are intentionally not managed by this package.
