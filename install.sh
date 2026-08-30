@@ -66,18 +66,13 @@ package_is_installed() {
   return 1
 }
 
-collection_installed=0
-package_is_installed "@riverai7z/omp" && collection_installed=1
-
 exec 3<>"$TTY"
 installed=()
 checked=()
 for i in "${!names[@]}"; do
   package=${packages[$i]}
   already_installed=0
-  if ((collection_installed)) && [[ "$package" != "npm:pi-web-access" ]]; then
-    already_installed=1
-  elif [[ -n "$package" ]] && package_is_installed "${package#npm:}"; then
+  if [[ -n "$package" ]] && package_is_installed "${package#npm:}"; then
     already_installed=1
   elif [[ -z "$package" && -f "$TOOLS_PATH" ]]; then
     already_installed=1
