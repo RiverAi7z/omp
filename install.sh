@@ -5,6 +5,8 @@ REPO="${OMP_GITHUB_REPO:-riverai7z/omp}"
 REF="${OMP_GITHUB_REF:-master}"
 RAW_BASE="${OMP_RAW_BASE:-https://raw.githubusercontent.com/${REPO}/${REF}}"
 TTY=/dev/tty
+EXTENSION_DIR="${PI_AGENT_DIR:-$HOME/.pi/agent}/extensions"
+TOOLS_PATH="${EXTENSION_DIR}/tools.ts"
 
 if ! command -v pi >/dev/null 2>&1; then
   printf 'Error: pi is not installed or is not in PATH.\n' >&2
@@ -41,10 +43,48 @@ packages=(
   ""
 )
 
+installed_packages=()
+if list_output=$(pi list 2>/dev/null); then
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^[[:space:]]*npm:([^[:space:]]+) ]]; then
+      spec=${BASH_REMATCH[1]}
+      if [[ "$spec" =~ ^(@[^/]+/[^@]+|[^@]+)(@.+)?$ ]]; then
+        installed_packages+=("${BASH_REMATCH[1]}")
+      fi
+    fi
+  done <<<"$list_output"
+else
+  printf 'Warning: could not check installed Pi packages; continuing.\n' >&2
+fi
+
+package_is_installed() {
+  local package=$1
+  local installed_package
+  for installed_package in "${installed_packages[@]}"; do
+    [[ "$installed_package" == "$package" ]] && return 0
+  done
+  return 1
+}
+
+collection_installed=0
+package_is_installed "@riverai7z/omp" && collection_installed=1
+
 exec 3<>"$TTY"
+installed=()
 checked=()
-for name in "${names[@]}"; do
-  if [[ "$name" == "@riverai7z/pi-read" ]]; then
+for i in "${!names[@]}"; do
+  package=${packages[$i]}
+  already_installed=0
+  if ((collection_installed)) && [[ "$package" != "npm:pi-web-access" ]]; then
+    already_installed=1
+  elif [[ -n "$package" ]] && package_is_installed "${package#npm:}"; then
+    already_installed=1
+  elif [[ -z "$package" && -f "$TOOLS_PATH" ]]; then
+    already_installed=1
+  fi
+  installed+=("$already_installed")
+
+  if ((already_installed)) || [[ "${names[$i]}" == "@riverai7z/pi-read" ]]; then
     checked+=(0)
   else
     checked+=(1)
@@ -70,11 +110,13 @@ render_menu() {
 
   for i in "${!names[@]}"; do
     marker=' '
+    label=${names[$i]}
     ((checked[i])) && marker='x'
+    ((installed[i])) && label+=' (installed)'
     if ((i == cursor)); then
-      printf '\033[7m> [%s] %s\033[0m\n' "$marker" "${names[$i]}" >&3
+      printf '\033[7m> [%s] %s\033[0m\n' "$marker" "$label" >&3
     else
-      printf '  [%s] %s\n' "$marker" "${names[$i]}" >&3
+      printf '  [%s] %s\n' "$marker" "$label" >&3
     fi
   done
 }
@@ -99,18 +141,24 @@ while true; do
       ((cursor < ${#names[@]} - 1)) && ((cursor++)) || true
       ;;
     ' ')
-      checked[cursor]=$((1 - checked[cursor]))
+      if ((!installed[cursor])); then
+        checked[cursor]=$((1 - checked[cursor]))
+      fi
       ;;
     a|A)
       next=0
-      for value in "${checked[@]}"; do
-        if ((!value)); then
+      for i in "${!checked[@]}"; do
+        if ((!installed[i] && !checked[i])); then
           next=1
           break
         fi
       done
       for i in "${!checked[@]}"; do
-        checked[i]=$next
+        if ((installed[i])); then
+          checked[i]=0
+        else
+          checked[i]=$next
+        fi
       done
       ;;
     q|Q)
@@ -131,7 +179,7 @@ done
 
 cleanup
 if ((${#selected[@]} == 0)); then
-  printf 'Nothing selected.\n' >&3
+  printf 'Nothing to install.\n' >&3
   exit 0
 fi
 
@@ -148,9 +196,8 @@ for index in "${selected[@]}"; do
       printf 'Error: curl is required to install Tools.\n' >&2
       exit 1
     fi
-    extension_dir="${PI_AGENT_DIR:-$HOME/.pi/agent}/extensions"
-    mkdir -p "$extension_dir"
-    curl -fsSL "${RAW_BASE}/extensions/tools.ts" -o "$extension_dir/tools.ts"
+    mkdir -p "$EXTENSION_DIR"
+    curl -fsSL "${RAW_BASE}/extensions/tools.ts" -o "$TOOLS_PATH"
   fi
 done
 

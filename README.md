@@ -36,7 +36,7 @@ Review [`install.sh`](./install.sh), then run it directly from GitHub:
 curl -fsSL https://raw.githubusercontent.com/riverai7z/omp/master/install.sh | bash
 ```
 
-The installer displays an interactive checkbox menu using each plugin's npm package name. All plugins are selected by default except `@riverai7z/pi-read`, which must be explicitly selected because it replaces Pi's built-in `read` tool. Use ↑/↓ to move, Space to toggle `[ ]`/`[x]`, and Enter to install the selected plugins. It also includes `pi-web-access`. npm plugins are installed through `pi install`; the local `extensions/tools.ts` extension is downloaded to `~/.pi/agent/extensions/tools.ts`.
+Before showing the interactive checkbox menu, the installer runs `pi list` and checks the local `extensions/tools.ts` path. Already-installed entries are labeled `(installed)`, left unchecked, and cannot be selected again. Among entries that are not installed, all are selected by default except `@riverai7z/pi-read`, which must be explicitly selected because it replaces Pi's built-in `read` tool. Use ↑/↓ to move, Space to toggle `[ ]`/`[x]`, and Enter to install the selected plugins. It also includes `pi-web-access`. npm plugins are installed through `pi install`; the local `extensions/tools.ts` extension is downloaded to `~/.pi/agent/extensions/tools.ts`.
 
 To install from a fork or another branch:
 
@@ -45,6 +45,6 @@ curl -fsSL https://raw.githubusercontent.com/OWNER/REPO/BRANCH/install.sh \
   | OMP_GITHUB_REPO=OWNER/REPO OMP_GITHUB_REF=BRANCH bash
 ```
 
-Use `pi config` to enable or disable resources after installation. Re-run the installer to update the local `Tools` extension.
+Use `pi config` to enable or disable resources after installation, and `pi update --extensions` to update installed npm packages. Delete the local `extensions/tools.ts` file before running the installer if you want to download it again.
 
 Global settings and `AGENTS.md` are intentionally not managed by this package.
