@@ -8,14 +8,47 @@ TTY=/dev/tty
 EXTENSION_DIR="${PI_AGENT_DIR:-$HOME/.pi/agent}/extensions"
 TOOLS_PATH="${EXTENSION_DIR}/tools.ts"
 
-if ! command -v pi >/dev/null 2>&1; then
-  printf 'Error: pi is not installed or is not in PATH.\n' >&2
-  exit 1
-fi
-
 if [[ ! -r "$TTY" || ! -w "$TTY" ]]; then
   printf 'Error: interactive installation requires a terminal.\n' >&2
   exit 1
+fi
+
+if ! command -v pi >/dev/null 2>&1; then
+  printf 'Pi is not installed. Install Pi now? [y/N] ' >"$TTY"
+  reply=''
+  IFS= read -r reply <"$TTY" || true
+  case "$reply" in
+    y|Y|yes|YES|Yes)
+      if ! command -v curl >/dev/null 2>&1; then
+        printf 'Error: curl is required to install Pi.\n' >&2
+        exit 1
+      fi
+      curl -fsSL https://pi.dev/install.sh | sh
+      hash -r
+      ;;
+    *)
+      printf 'Installation cancelled.\n' >"$TTY"
+      exit 0
+      ;;
+  esac
+
+  if ! command -v pi >/dev/null 2>&1; then
+    printf 'Error: Pi was installed but pi is not available in PATH. Restart your shell and try again.\n' >&2
+    exit 1
+  fi
+fi
+
+if [[ "$(uname -s)" == "Linux" ]]; then
+  missing_dependencies=()
+  command -v rg >/dev/null 2>&1 || missing_dependencies+=("ripgrep (rg) not found")
+  command -v bwrap >/dev/null 2>&1 || missing_dependencies+=("bubblewrap (bwrap) not installed")
+  command -v socat >/dev/null 2>&1 || missing_dependencies+=("socat not installed")
+
+  if ((${#missing_dependencies[@]} > 0)); then
+    printf 'Error: Missing sandbox dependencies:\n' >&2
+    printf '  - %s\n' "${missing_dependencies[@]}" >&2
+    exit 1
+  fi
 fi
 
 names=(
