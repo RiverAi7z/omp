@@ -208,6 +208,26 @@ for i in "${!names[@]}"; do
     checked+=(1)
   fi
 done
+
+sorted_names=()
+sorted_packages=()
+sorted_installed=()
+sorted_checked=()
+for desired_checked in 1 0; do
+  for i in "${!names[@]}"; do
+    if ((checked[i] == desired_checked)); then
+      sorted_names+=("${names[$i]}")
+      sorted_packages+=("${packages[$i]}")
+      sorted_installed+=("${installed[$i]}")
+      sorted_checked+=("${checked[$i]}")
+    fi
+  done
+done
+names=("${sorted_names[@]}")
+packages=("${sorted_packages[@]}")
+installed=("${sorted_installed[@]}")
+checked=("${sorted_checked[@]}")
+
 cursor=0
 ui_active=0
 
