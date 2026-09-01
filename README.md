@@ -23,7 +23,9 @@ The installer offers:
 - `pi-web-access`
 - `extensions/tools.ts`
 
-Before showing the interactive checkbox menu, the installer offers to install Pi with the official installer if `pi` is not in `PATH`. After installation, it detects Pi's install directory and adds it to the installer's current `PATH`, so extension installation can continue without restarting the shell. On Linux, it also requires the sandbox dependencies `ripgrep` (`rg`), `bubblewrap` (`bwrap`), and `socat`, and reports every missing dependency.
+Before showing the interactive checkbox menu, the installer offers to install Pi with the official installer if `pi` is not in `PATH`. After installation, it detects Pi's install directory and adds it to the installer's current `PATH`, so extension installation can continue without restarting the shell.
+
+The installer also checks required command-line dependencies and offers to install any that are missing. On macOS it checks `ripgrep` (`rg`) and installs it with Homebrew. On Linux it checks `ripgrep`, `bubblewrap` (`bwrap`), and `socat`, using a supported system package manager (`apt`, `apk`, `dnf`, `yum`, `pacman`, or `zypper`). Linux system package installation may prompt for a `sudo` password.
 
 The installer then runs `pi list` and checks the local `extensions/tools.ts` path. Already-installed entries are labeled `(installed)`, left unchecked, and cannot be selected again. Among entries that are not installed, all are selected by default except `@riverai7z/pi-read`, `@riverai7z/pi-todo`, and `pi-simplify`; these must be explicitly selected. `@riverai7z/pi-read` is opt-in because it replaces Pi's built-in `read` tool. Use ↑/↓ to move, Space to toggle `[ ]`/`[x]`, and Enter to install the selected extensions.
 

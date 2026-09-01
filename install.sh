@@ -61,17 +61,84 @@ if ! command -v pi >/dev/null 2>&1; then
   fi
 fi
 
-if [[ "$(uname -s)" == "Linux" ]]; then
-  missing_dependencies=()
-  command -v rg >/dev/null 2>&1 || missing_dependencies+=("ripgrep (rg) not found")
-  command -v bwrap >/dev/null 2>&1 || missing_dependencies+=("bubblewrap (bwrap) not installed")
-  command -v socat >/dev/null 2>&1 || missing_dependencies+=("socat not installed")
-
-  if ((${#missing_dependencies[@]} > 0)); then
-    printf 'Error: Missing sandbox dependencies:\n' >&2
-    printf '  - %s\n' "${missing_dependencies[@]}" >&2
-    exit 1
+run_as_root() {
+  if ((EUID == 0)); then
+    "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    printf 'Error: sudo is required to install system dependencies.\n' >&2
+    return 1
   fi
+}
+
+install_dependencies() {
+  local platform=$1
+  shift
+  local dependencies=("$@")
+
+  if [[ "$platform" == "Darwin" ]]; then
+    if ! command -v brew >/dev/null 2>&1; then
+      printf 'Error: Homebrew is required to install %s.\n' "${dependencies[*]}" >&2
+      return 1
+    fi
+    brew install "${dependencies[@]}"
+  elif command -v apt-get >/dev/null 2>&1; then
+    run_as_root apt-get update
+    run_as_root apt-get install -y "${dependencies[@]}"
+  elif command -v apk >/dev/null 2>&1; then
+    run_as_root apk add --update-cache "${dependencies[@]}"
+  elif command -v dnf >/dev/null 2>&1; then
+    run_as_root dnf install -y "${dependencies[@]}"
+  elif command -v yum >/dev/null 2>&1; then
+    run_as_root yum install -y "${dependencies[@]}"
+  elif command -v pacman >/dev/null 2>&1; then
+    run_as_root pacman -S --needed --noconfirm "${dependencies[@]}"
+  elif command -v zypper >/dev/null 2>&1; then
+    run_as_root zypper --non-interactive install "${dependencies[@]}"
+  else
+    printf 'Error: no supported package manager was found. Install manually: %s\n' "${dependencies[*]}" >&2
+    return 1
+  fi
+}
+
+platform=$(uname -s)
+missing_dependencies=()
+missing_dependency_messages=()
+
+if [[ "$platform" == "Darwin" || "$platform" == "Linux" ]]; then
+  if ! command -v rg >/dev/null 2>&1; then
+    missing_dependencies+=("ripgrep")
+    missing_dependency_messages+=("ripgrep (rg) not found")
+  fi
+fi
+if [[ "$platform" == "Linux" ]]; then
+  if ! command -v bwrap >/dev/null 2>&1; then
+    missing_dependencies+=("bubblewrap")
+    missing_dependency_messages+=("bubblewrap (bwrap) not installed")
+  fi
+  if ! command -v socat >/dev/null 2>&1; then
+    missing_dependencies+=("socat")
+    missing_dependency_messages+=("socat not installed")
+  fi
+fi
+
+if ((${#missing_dependencies[@]} > 0)); then
+  printf 'Missing dependencies:\n' >"$TTY"
+  printf '  - %s\n' "${missing_dependency_messages[@]}" >"$TTY"
+  printf 'Install them now? [Y/n] ' >"$TTY"
+  reply=''
+  IFS= read -r reply <"$TTY" || true
+  case "$reply" in
+    n|N|no|NO|No)
+      printf 'Installation cancelled.\n' >"$TTY"
+      exit 1
+      ;;
+    *)
+      install_dependencies "$platform" "${missing_dependencies[@]}"
+      hash -r
+      ;;
+  esac
 fi
 
 names=(
