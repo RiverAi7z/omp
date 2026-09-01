@@ -13,6 +13,29 @@ if [[ ! -r "$TTY" || ! -w "$TTY" ]]; then
   exit 1
 fi
 
+refresh_pi_path() {
+  local candidate
+  local npm_prefix
+  local candidates=(
+    "${XDG_DATA_HOME:-$HOME/.local/share}/pi-node/current/bin"
+    "$HOME/.local/bin"
+    "${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/bin"
+  )
+
+  if command -v npm >/dev/null 2>&1; then
+    npm_prefix=$(npm prefix -g 2>/dev/null || npm config get prefix 2>/dev/null || true)
+    [[ -n "$npm_prefix" ]] && candidates+=("$npm_prefix/bin")
+  fi
+
+  for candidate in "${candidates[@]}"; do
+    if [[ -x "$candidate/pi" && ":$PATH:" != *":$candidate:"* ]]; then
+      PATH="$candidate:$PATH"
+    fi
+  done
+  export PATH
+  hash -r
+}
+
 if ! command -v pi >/dev/null 2>&1; then
   printf 'Pi is not installed. Install Pi now? [y/N] ' >"$TTY"
   reply=''
@@ -24,7 +47,7 @@ if ! command -v pi >/dev/null 2>&1; then
         exit 1
       fi
       curl -fsSL https://pi.dev/install.sh | sh
-      hash -r
+      refresh_pi_path
       ;;
     *)
       printf 'Installation cancelled.\n' >"$TTY"
@@ -112,7 +135,7 @@ for i in "${!names[@]}"; do
   fi
   installed+=("$already_installed")
 
-  if ((already_installed)) || [[ "${names[$i]}" == "@riverai7z/pi-read" || "${names[$i]}" == "pi-simplify" ]]; then
+  if ((already_installed)) || [[ "${names[$i]}" == "@riverai7z/pi-read" || "${names[$i]}" == "@riverai7z/pi-todo" || "${names[$i]}" == "pi-simplify" ]]; then
     checked+=(0)
   else
     checked+=(1)
